@@ -1,3 +1,9 @@
+VB-52: Added some changes for Inkscape 1.0 / Python 3 support.
+- only tested on Linux / Python 3.8 with PDF export. 
+- no backward-compatibility with older Inkscape-versions (Python 2 based)
+- Zenity window works, but opens second window
+- added --text as command line parameter for zenity window text
+
 [Hier geht's zur deutschen Version](README-de.md)
 
 This is a reimplementation of the Inkscape generator plugin by Aurélio A.
