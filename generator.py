@@ -1,5 +1,5 @@
 #! /usr/bin/python
-# coding=utf-8
+# -*- coding: utf-8 -*-
 
 #   Generator-Python - a Inkscape extension to generate end-use files
 #   from a model
@@ -60,10 +60,11 @@ if platform.system() != 'Windows' and Is_executable('zenity'):
                     '--progress',
                     '--title={0}'.format(self.__title),
                     '--text={0}'.format(self.__text),
+                    #'--percentage=0',
                     '--auto-close',
                     '--width=400'
                 ], stdin=subprocess.PIPE, stdout=self.__devnull,
-                stderr=self.__devnull)
+                stderr=self.__devnull, bufsize=0)
             self.__active = True
             return self
 
@@ -73,7 +74,8 @@ if platform.system() != 'Windows' and Is_executable('zenity'):
 
         def Set_percent(self, p):
             if self.is_active:
-                self.__proc.stdin.write(str(p) + '\n')
+                self.__proc.stdin.write('{}\n'.format(p).encode('utf-8'))
+                #self.__proc.stdin.write('{:.0f}\n'.format(p).encode('utf-8'))
 
         @property
         def is_active(self):
@@ -178,6 +180,8 @@ def Get_command_line_arguments():
     parser.add_argument(
         '--specialchars', choices=['TRUE', 'FALSE'], default='TRUE', type=str.upper,
         help='Handle special XML characters')
+    parser.add_argument(
+        '--text', default='Generating...', help='Window text')
     parser.add_argument('infile', help='SVG input file')
 
     args = parser.parse_known_args()[0]
@@ -194,7 +198,7 @@ def Generate(replacements):
 
     tmp_svg = os.path.join(globaldata.tempdir, 'temp.svg')
 
-    with open(tmp_svg, 'wb') as f:
+    with open(tmp_svg, 'w') as f:
         f.write(template)
 
     if globaldata.args.format == 'SVG':
@@ -213,9 +217,12 @@ def Ink_render(infile, outfile, format):
     Call_or_die(
         [
             'inkscape',
-            '--without-gui',
-            '--export-{0}={1}'.format(
-                format.lower(), outfile),
+            '-g',
+            #'--shell',
+            '--batch-process',
+            '--export-type={0}'.format(
+                format.lower()),
+            '--export-filename={0}'.format(outfile),
             '--export-dpi={0}'.format(globaldata.args.dpi),
             infile
         ],
@@ -323,7 +330,7 @@ def Process_csv_file(csvfile):
             Open_file_viewer(new_file)
             break
     else:  # no preview
-        with ProgressBar('Generator', 'Generating...') as progress:
+        with ProgressBar('Generator', globaldata.args.text) as progress:
             for num, row in enumerate(csvdata, start=1):
                 Generate(row)
                 if not progress.is_active:
@@ -355,10 +362,10 @@ try:
     if outdir != '' and not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    with open(globaldata.args.infile, 'rb') as f:
+    with open(globaldata.args.infile, 'r') as f:
         globaldata.template = f.read()
 
-    with open(globaldata.args.datafile, 'rb') as csvfile:
+    with open(globaldata.args.datafile, 'r') as csvfile:
         Process_csv_file(csvfile)
 
 finally:
