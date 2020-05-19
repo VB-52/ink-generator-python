@@ -111,18 +111,18 @@ else:
 if platform.system() == 'Windows':
     def Show_info(title, message):
         MB_ICONINFORMATION = 0x40
-        ctypes.windll.user32.MessageBoxA(0, message, title, MB_ICONINFORMATION)
+        ctypes.windll.user32.MessageBoxW(0, message, title, MB_ICONINFORMATION)
 
     def Show_question(title, message):
         MB_ICONQUESTION = 0x20
         MB_YESNO = 0x4
         IDYES = 6
-        return ctypes.windll.user32.MessageBoxA(
+        return ctypes.windll.user32.MessageBoxW(
             0, message, title, MB_ICONQUESTION | MB_YESNO) == IDYES
 
     def Show_error_and_exit(title, message):
         MB_ICONERROR = 0x10
-        ctypes.windll.user32.MessageBoxA(0, message, title, MB_ICONERROR)
+        ctypes.windll.user32.MessageBoxW(0, message, title, MB_ICONERROR)
         sys.exit(1)
 
 elif Is_executable('zenity'):
